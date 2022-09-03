@@ -1,0 +1,61 @@
+dotnet tool install --global Apache.Avro.Tools
+
+
+
+.\bin\windows\kafka-topics.bat --create --topic cursos --bootstrap-server localhost:9092
+.\bin\windows\kafka-topics.bat --create --topic chat --bootstrap-server localhost:9092 --partitions 2 --replication-factor 2
+
+
+
+.\bin\windows\kafka-topics.bat --list --bootstrap-server localhost:9092
+
+
+
+.\bin\windows\kafka-topics.bat --delete --topic cursos --bootstrap-server localhost:9092
+
+
+
+.\bin\windows\kafka-topics.bat --alter --topic chat --bootstrap-server localhost:9095 --partitions 3
+
+
+
+.\bin\windows\kafka-topics.bat --describe --topic chat --bootstrap-server localhost:9095
+
+
+
+
+
+--produzir
+
+
+
+.\bin\windows\kafka-console-producer.bat --topic chat --bootstrap-server localhost:9095
+
+
+
+
+--ler
+.\bin\windows\kafka-console-consumer.bat --topic chat  --bootstrap-server localhost:9095
+
+
+
+.\bin\windows\kafka-console-consumer.bat --topic chat  --bootstrap-server localhost:9095 --from-beginning
+
+
+
+.\bin\windows\kafka-console-consumer.bat --topic chat  --bootstrap-server localhost:9095 --from-beginning --property print.partition=true --property print.offset=true
+
+
+
+
+.\bin\windows\kafka-console-consumer.bat --topic chat  --bootstrap-server localhost:9095 --from-beginning --property print.partition=true --property print.offset=true --group grupo1
+
+
+
+
+
+---avros
+
+
+
+avrogen -s ..\Avros\Curso.avsc .
