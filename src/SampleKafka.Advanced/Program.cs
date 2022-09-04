@@ -1,3 +1,3 @@
 ﻿using SampleKafka.Advanced;
 
-await Scenarios.ReadMessageManyTimes();
+await Scenarios.ProducerAndConsumerWithHeader();

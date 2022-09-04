@@ -1,4 +1,5 @@
 ﻿using Confluent.Kafka;
+using System.Text;
 
 namespace SampleKafka.Advanced
 {
@@ -145,5 +146,111 @@ namespace SampleKafka.Advanced
         }
 
         #endregion Consumindo mensagens mais de uma vez
+
+        #region Consumindo Transações
+
+        /// <summary>
+        /// consome apenas mensagens que foram commitadas
+        /// </summary>
+        /// <param name="topico">nome do tópico</param>
+        /// <param name="groupId">nome do grupo de consumidores</param>
+        private static void ConsumirReadCommitted(string topico, string groupId)
+        {
+            var clientId = Guid.NewGuid().ToString().Substring(0, 5);
+
+            var conf = new ConsumerConfig
+            {
+                //identificação da máquina dentro de um grupo de consumidores
+                ClientId = clientId,
+                GroupId = groupId,
+                BootstrapServers = _bootstrapServers,
+                AutoOffsetReset = AutoOffsetReset.Latest,
+                EnablePartitionEof = true,
+                EnableAutoCommit = false,
+
+                // Configurar para consumir apenas mensagens confirmadas.
+                IsolationLevel = IsolationLevel.ReadCommitted
+            };
+
+            using var consumer = new ConsumerBuilder<string, string>(conf).Build();
+
+            consumer.Subscribe(topico);
+            Console.WriteLine($"grupo: {groupId} - client {clientId} aguardando mensagens");
+
+            while (true)
+            {
+                var result = consumer.Consume();
+
+                if (result.IsPartitionEOF)
+                {
+                    continue;
+                }
+
+                var messsage = "<< Recebida: \t" + result.Message.Value + $" - {groupId}-{clientId}";
+                Console.WriteLine(messsage);
+
+                consumer.Commit(result);
+            }
+        }
+
+        #endregion Consumindo Transações
+
+        #region Consumindo msg com headers
+
+        /// <summary>
+        /// consome mensagens e headers
+        /// </summary>
+        /// <param name="topico">nome do tópico</param>
+        /// <param name="groupId">nome do grupo de consumidores</param>
+        public static void ConsumirComHeaders(string topico, string groupId)
+        {
+            var clientId = Guid.NewGuid().ToString().Substring(0, 5);
+
+            var conf = new ConsumerConfig
+            {
+                //identificação da máquina dentro de um grupo de consumidores
+                ClientId = clientId,
+                GroupId = groupId,
+                BootstrapServers = _bootstrapServers,
+                AutoOffsetReset = AutoOffsetReset.Latest,
+                EnablePartitionEof = true,
+                EnableAutoCommit = false,
+
+                // Configurar para consumir apenas mensagens confirmadas.
+                IsolationLevel = IsolationLevel.ReadCommitted
+            };
+
+            using var consumer = new ConsumerBuilder<string, string>(conf).Build();
+
+            consumer.Subscribe(topico);
+            Console.WriteLine($"grupo: {groupId} - client {clientId} aguardando mensagens");
+
+            while (true)
+            {
+                var result = consumer.Consume();
+
+                if (result.IsPartitionEOF)
+                {
+                    continue;
+                }
+
+                var headers = result
+                              .Message
+                              .Headers
+                              .ToDictionary(p => p.Key, p => Encoding.UTF8.GetString(p.GetValueBytes()));
+
+                var messsage = "<< Recebida: \t" + result.Message.Value + $" - {groupId}-{clientId}";
+                Console.WriteLine(messsage);
+
+                foreach (var item in headers)
+                {
+                    Console.WriteLine($"nome: {item.Key} - valor: {item.Value}");
+                }
+
+                consumer.Commit(result);
+            }
+        }
+
+        #endregion Consumindo msg com headers
     }
 }

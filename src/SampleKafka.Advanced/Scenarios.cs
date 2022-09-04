@@ -1,4 +1,6 @@
-﻿namespace SampleKafka.Advanced
+﻿using System.Net;
+
+namespace SampleKafka.Advanced
 {
     internal static class Scenarios
     {
@@ -69,6 +71,24 @@
             await SendMessageWithEnter();
         }
 
+        /// <summary>
+        /// lendo uma mensagem mais de uma vez
+        /// </summary>
+        /// <returns></returns>
+        public static async Task ProducerAndConsumerWithHeader()
+        {
+            _ = Task.Run(() => ConsumerTools.ConsumirComHeaders(Topico, "producer-and-consumer-with-header"));
+
+            var headers = new Dictionary<string, string>
+            {
+                {"Application","SampleKafka.Advanced"},
+                {"HostName",Dns.GetHostName()},
+                {"time",DateTime.Now.ToString()},
+            };
+
+            await SendMessageWithHeaders(headers);
+        }
+
         private static async Task SendMessageWithEnter()
         {
             Console.WriteLine("Pressione ENTER para enviar uma mensagem");
@@ -76,6 +96,16 @@
             {
                 Console.ReadLine();
                 await ProducerTools.ProduzirAcksNone(Topico);
+            }
+        }
+
+        private static async Task SendMessageWithHeaders(Dictionary<string, string> headers, string? transactionalId = null)
+        {
+            Console.WriteLine("Pressione ENTER para enviar uma mensagem");
+            while (true)
+            {
+                Console.ReadLine();
+                await ProducerTools.ProduzirComHeaders(Topico, headers, transactionalId);
             }
         }
     }

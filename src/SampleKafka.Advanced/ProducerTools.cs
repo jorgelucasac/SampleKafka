@@ -1,4 +1,5 @@
 ﻿using Confluent.Kafka;
+using System.Text;
 
 namespace SampleKafka.Advanced
 {
@@ -52,7 +53,7 @@ namespace SampleKafka.Advanced
             try
             {
                 using var producer = new ProducerBuilder<string, string>(configuracao).Build();
-                var mensagem = $"Mensagem ({_count}) - {Guid.NewGuid()}";
+                var mensagem = GetMessage();
 
                 var result = await producer.ProduceAsync(topico, new Message<string, string>
                 {
@@ -97,7 +98,7 @@ namespace SampleKafka.Advanced
             try
             {
                 using var producer = new ProducerBuilder<string, string>(configuracao).Build();
-                var mensagem = $"Mensagem ({_count}) - {Guid.NewGuid()}";
+                var mensagem = GetMessage();
 
                 var result = await producer.ProduceAsync(topico, new Message<string, string>
                 {
@@ -116,5 +117,128 @@ namespace SampleKafka.Advanced
         }
 
         #endregion Indepotencia
+
+        #region Transações
+
+        /// <summary>
+        /// produz mensangens em uma transação
+        /// </summary>
+        /// <param name="topico"></param>
+        /// <returns></returns>
+        public static async Task ProduzirComTransacao(string topico, Guid transactionalId)
+        {
+            _count++;
+            var configuracao = new ProducerConfig
+            {
+                BootstrapServers = _bootstrapServers,
+                Partitioner = Partitioner.ConsistentRandom,
+                EnableIdempotence = true,
+                Acks = Acks.All,
+                MaxInFlight = 1,
+                MessageSendMaxRetries = 2,
+
+                TransactionalId = transactionalId.ToString(),//
+            };
+
+            try
+            {
+                using var producer = new ProducerBuilder<string, string>(configuracao).Build();
+                var mensagem = GetMessage();
+
+                //se comunica com o cordenador de transações, informando que um transação esta sendo iniciada
+                producer.InitTransactions(TimeSpan.FromSeconds(5));
+                producer.BeginTransaction();//inicia a transação
+
+                var result = await producer.ProduceAsync(topico, new Message<string, string>
+                {
+                    Key = Guid.NewGuid().ToString(),
+                    Value = mensagem
+                }); ;
+
+                // Confirma a transação
+                producer.CommitTransaction();
+
+                // Em caso de erro pode abortar a transação
+                //producer.AbortTransaction();
+
+                Console.WriteLine($"<< enviada: \t {mensagem} - partição{result.Partition.Value}");
+
+                await Task.CompletedTask;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex.ToString());
+            }
+        }
+
+        #endregion Transações
+
+        #region Headers e tracing
+
+        /// <summary>
+        /// produz mensangens com headers
+        /// </summary>
+        /// <param name="topico"></param>
+        /// <returns></returns>
+        public static async Task ProduzirComHeaders(string topico, Dictionary<string, string> headers, string? transactionalId = null)
+        {
+            _count++;
+            var configuracao = new ProducerConfig
+            {
+                BootstrapServers = _bootstrapServers,
+                Partitioner = Partitioner.ConsistentRandom,
+                EnableIdempotence = true,
+                Acks = Acks.All,
+                MaxInFlight = 1,
+                MessageSendMaxRetries = 2,
+
+                TransactionalId = transactionalId ?? Guid.NewGuid().ToString(),
+            };
+
+            var producerHeaders = new Headers();
+            foreach (var header in headers)
+            {
+                producerHeaders.Add(header.Key, Encoding.UTF8.GetBytes(header.Value));
+            }
+            producerHeaders.Add("transactionId", Encoding.UTF8.GetBytes(configuracao.TransactionalId));
+
+            try
+            {
+                using var producer = new ProducerBuilder<string, string>(configuracao).Build();
+                var mensagem = GetMessage();
+
+                //se comunica com o cordenador de transações, informando que um transação esta sendo iniciada
+                producer.InitTransactions(TimeSpan.FromSeconds(5));
+                producer.BeginTransaction();//inicia a transação
+
+                var result = await producer.ProduceAsync(topico, new Message<string, string>
+                {
+                    Key = Guid.NewGuid().ToString(),
+                    Value = mensagem,
+                    Headers = producerHeaders
+                }); ;
+
+                // Confirma a transação
+                producer.CommitTransaction();
+
+                // Em caso de erro pode abortar a transação
+                //producer.AbortTransaction();
+
+                Console.WriteLine($"<< enviada: \t {mensagem} - partição{result.Partition.Value}");
+
+                await Task.CompletedTask;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex.ToString());
+            }
+        }
+
+        #endregion Headers e tracing
+
+        private static string GetMessage()
+        {
+            return $"Mensagem ({_count}) - {Guid.NewGuid()}"; ;
+        }
     }
 }
