@@ -5,11 +5,15 @@ VisualStudioVersion = 17.1.32228.430
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Consumers", "Consumers", "{FEA49ED1-712D-4B94-9FBE-C3FB34BC7139}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleKafka.Consumer", "src\SampleKafka.Consumer\SampleKafka.Consumer.csproj", "{7112C118-8B4B-4E4B-B4F9-9AD735C5E628}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleKafka.Consumer", "src\SampleKafka.Consumer\SampleKafka.Consumer.csproj", "{7112C118-8B4B-4E4B-B4F9-9AD735C5E628}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Producers", "Producers", "{6509A90C-0F9B-4316-BDB9-B59EF3EA5632}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleKafka.Producer", "src\SampleKafka.Producer\SampleKafka.Producer.csproj", "{02AD7600-ECC8-44A0-A686-C3B3E379920F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleKafka.Producer", "src\SampleKafka.Producer\SampleKafka.Producer.csproj", "{02AD7600-ECC8-44A0-A686-C3B3E379920F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Advanced", "Advanced", "{A4F7C739-FE7E-4F34-92C1-A1C0D3954A49}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleKafka.Advanced", "src\SampleKafka.Advanced\SampleKafka.Advanced.csproj", "{71EC69A0-3220-44E5-AAEA-A9B0C41D1A5A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,6 +29,10 @@ Global
 		{02AD7600-ECC8-44A0-A686-C3B3E379920F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{02AD7600-ECC8-44A0-A686-C3B3E379920F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{02AD7600-ECC8-44A0-A686-C3B3E379920F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71EC69A0-3220-44E5-AAEA-A9B0C41D1A5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71EC69A0-3220-44E5-AAEA-A9B0C41D1A5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71EC69A0-3220-44E5-AAEA-A9B0C41D1A5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71EC69A0-3220-44E5-AAEA-A9B0C41D1A5A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -32,6 +40,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{7112C118-8B4B-4E4B-B4F9-9AD735C5E628} = {FEA49ED1-712D-4B94-9FBE-C3FB34BC7139}
 		{02AD7600-ECC8-44A0-A686-C3B3E379920F} = {6509A90C-0F9B-4316-BDB9-B59EF3EA5632}
+		{71EC69A0-3220-44E5-AAEA-A9B0C41D1A5A} = {A4F7C739-FE7E-4F34-92C1-A1C0D3954A49}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {786A0085-5D02-48E3-A7DE-4CDE8A4F6E60}
