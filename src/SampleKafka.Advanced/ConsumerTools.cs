@@ -53,7 +53,7 @@ namespace SampleKafka.Advanced
             using var consumer = new ConsumerBuilder<string, string>(conf).Build();
 
             consumer.Subscribe(topico);
-            Console.WriteLine($"grupo: {groupId} - client {clientId} aguradando mensagens");
+            Console.WriteLine($"grupo: {groupId} - client {clientId} aguardando mensagens");
 
             while (true)
             {
@@ -81,7 +81,7 @@ namespace SampleKafka.Advanced
         /// <param name="topico">nome do tópico</param>
         /// <param name="groupId">nome do grupo de consumidores</param>
         /// <param name="autoOffsetReset"></param>
-        private static void ConsumirEnableAutoOffsetStore(string topico, string groupId)
+        public static async void ConsumirEnableAutoOffsetStore(string topico, string groupId)
         {
             var clientId = Guid.NewGuid().ToString().Substring(0, 5);
             int tentativas = 0;
@@ -100,7 +100,7 @@ namespace SampleKafka.Advanced
             using var consumer = new ConsumerBuilder<string, string>(conf).Build();
 
             consumer.Subscribe(topico);
-            Console.WriteLine($"grupo: {groupId} - client {clientId} aguradando mensagens");
+            Console.WriteLine($"grupo: {groupId} - client {clientId} aguardando mensagens");
 
             while (true)
             {
@@ -116,9 +116,10 @@ namespace SampleKafka.Advanced
 
                 // Tentar processar mensagem
                 tentativas++;
-                if (!ProcessarMensagem(result.Message.Key) && tentativas < 3)
+                if (!await ProcessarMensagem(result.Message.Key) && tentativas < 3)
                 {
-                    //desloca o offset para que seja lida a proxima msg da lista
+                    //informa para o kafka que a proxima msg consumida deve ser dessa partição
+                    //e desse offset especifico, ou seja, a mesma mensagem
                     consumer.Seek(result.TopicPartitionOffset);
 
                     continue;
@@ -130,16 +131,16 @@ namespace SampleKafka.Advanced
                     Console.WriteLine("Enviando mensagem para: DeadLetter");
                     tentativas = 0;
                 }
-
-                consumer.Commit(result);
+                //move o offset para que seja possível ler as próximas mensagens
                 consumer.StoreOffset(result.TopicPartitionOffset);
+                consumer.Commit(result);
             }
         }
 
-        private static bool ProcessarMensagem(string key)
+        private static async Task<bool> ProcessarMensagem(string key)
         {
             Console.WriteLine($"KEY:{key} - {DateTime.Now}");
-            Task.Delay(2000).Wait();
+            await Task.Delay(TimeSpan.FromSeconds(2));
             return false;
         }
 
